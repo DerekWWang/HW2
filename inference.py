@@ -18,6 +18,9 @@ config = GPTConfig(
     bias=True
 )
 
+# Edit model path here
+MODEL = ""
+
 chars = "<s>I love machine learning<e>"
 vocab = sorted(set(tokenize(chars)))
 print(vocab)
@@ -48,5 +51,5 @@ def generate(model, idx, max_new_tokens):
 context = "<s>" 
 tokens = tokenize(context)
 context_ids = torch.tensor([[stoi[c] for c in tokens]], dtype=torch.long).to(device)
-generated_ids = generate(model, context_ids, max_new_tokens=15)[0].tolist()
+generated_ids = generate(MODEL, context_ids, max_new_tokens=15)[0].tolist()
 print("Generated:", decode(generated_ids))
