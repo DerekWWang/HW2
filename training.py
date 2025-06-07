@@ -8,6 +8,7 @@ from tokenizer import tokenize
 import numpy as np
 from data.prepare_dataset import concat_csv_strings
 from pathlib import Path
+from tqdm import tqdm, trange
 
 # ==== Configuration ====
 config = GPTConfig(
@@ -95,7 +96,7 @@ optimizer = model.configure_optimizers(
     device_type=device
 )
 
-for step in range(EPOCHS):
+for step in trange(EPOCHS, desc="Training"):
     logits = model(x)
     B, T, C = logits.shape
 
@@ -107,8 +108,8 @@ for step in range(EPOCHS):
     loss.backward()
     optimizer.step()
 
-    if step % 50 == 0 or step == 499:
-        print(f"Step {step}: Loss = {loss.item():.9f}")
+    if step % 50 == 0 or step == EPOCHS - 1:
+        tqdm.write(f"Step {step}: Loss = {loss.item():.9f}")
 
 # ==== Evaluation on Validation Set ====
 print("\nRunning evaluation on validation set...")
@@ -121,7 +122,7 @@ if len(val_tokens) < config.block_size + 1:
     val_tokens += ['<e>'] * pad_len
 
 X_val, Y_val = [], []
-for i in range(len(val_tokens) - config.block_size):
+for i in tqdm(range(len(val_tokens) - config.block_size), desc="Encoding validation chunks"):
     chunk_input = val_tokens[i:i + config.block_size]
     chunk_target = val_tokens[i + 1:i + config.block_size + 1]
     X_val.append(encode(chunk_input))
