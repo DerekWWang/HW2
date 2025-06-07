@@ -43,7 +43,7 @@ def generate_div(p):
     return f"{n} / {b} = {c}"
     
 
-def generate_batch(d = 1000, save=False):
+def generate_batch(d = 1000, filepath=''):
     res = []
     for _ in range(d):
         r = random.randint(1,3)
@@ -55,12 +55,26 @@ def generate_batch(d = 1000, save=False):
         else:
             res.append(f"<s>{generate_div(p)}<e>")
 
-    if save:
+    if filepath != '':
         with open('output.csv', 'w', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter='\n')
             writer.writerow(res)
 
     return res
 
+def generate_add_sub(d = 1000, p=97, filepath=''):
+    res = []
+    for _ in range(d):
+        r = random.random()
+        if r < 0.5:
+            res.append(f"<s>{generate_add(p)}<e>")
+        else:
+            res.append(f"<s>{generate_sub(p)}<e>")
+    if filepath != '':
+        with open(filepath, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter='\n')
+            writer.writerow(res)
+
+    return res
 
 # generate_batch(1000, True)
