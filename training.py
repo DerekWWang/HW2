@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -7,6 +8,8 @@ from model import GPT, GPTConfig
 from tokenizer import tokenize
 import numpy as np
 from data.prepare_dataset import concat_csv_strings
+from pathlib import Path
+from tqdm import tqdm, trange
 
 # ==== Configuration ====
 config = GPTConfig(
@@ -20,11 +23,15 @@ config = GPTConfig(
 )
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print(device)
 
-EPOCHS = 10e5
-DATASET_TRAIN = "/Users/derekzhu/Code/HW2/data/splits/math_97_train.csv"
-DATASET_VALID = "/Users/derekzhu/Code/HW2/data/splits/math_97_val.csv"
-DATASET_TEST = "/Users/derekzhu/Code/HW2/data/splits/math_97_test.csv"
+EPOCHS = 100000 # 10e5
+
+script_dir = Path(__file__).resolve().parent
+
+DATASET_TRAIN = script_dir / "data/splits/math_97_train.csv"
+DATASET_VALID = script_dir / "data/splits/math_97_val.csv"
+DATASET_TEST = script_dir / "data/splits/math_97_test.csv"
 
 MODEL_NAME = "part_2.2"
 
@@ -90,7 +97,36 @@ optimizer = model.configure_optimizers(
     device_type=device
 )
 
-for step in range(EPOCHS):
+checkpoint_path = "model_checkpoint.pth"
+
+def save_checkpoint(model, optimizer, step, loss, filename=checkpoint_path):
+    checkpoint = {
+        'step': step,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'loss': loss
+    }
+    torch.save(checkpoint, filename)
+    print(f"Checkpoint saved at step {step}")
+
+def load_checkpoint(model, optimizer, filename=checkpoint_path):
+    if os.path.exists(filename):
+        checkpoint = torch.load(filename)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        print(f"Checkpoint loaded from step {checkpoint['step']}")
+        return checkpoint['step'] + 1  
+    else:
+        return 0 
+
+start_step = load_checkpoint(model, optimizer)
+
+loss_log_path = "loss_log.txt"
+if start_step == 0:
+    with open(loss_log_path, "w") as f:
+        f.write("step,loss\n")
+
+for step in range(start_step, EPOCHS):
     logits = model(x)
     B, T, C = logits.shape
 
@@ -102,8 +138,12 @@ for step in range(EPOCHS):
     loss.backward()
     optimizer.step()
 
-    if step % 50 == 0 or step == 499:
+    if step % 50 == 0 or step == EPOCHS - 1:
         print(f"Step {step}: Loss = {loss.item():.9f}")
+        save_checkpoint(model, optimizer, step, loss.item())
+        
+        with open(loss_log_path, "a") as f:
+            f.write(f"{step},{loss.item():.9f}\n")
 
 # ==== Evaluation on Validation Set ====
 print("\nRunning evaluation on validation set...")
@@ -116,7 +156,7 @@ if len(val_tokens) < config.block_size + 1:
     val_tokens += ['<e>'] * pad_len
 
 X_val, Y_val = [], []
-for i in range(len(val_tokens) - config.block_size):
+for i in tqdm(range(len(val_tokens) - config.block_size), desc="Encoding validation chunks"):
     chunk_input = val_tokens[i:i + config.block_size]
     chunk_target = val_tokens[i + 1:i + config.block_size + 1]
     X_val.append(encode(chunk_input))

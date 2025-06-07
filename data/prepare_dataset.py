@@ -2,7 +2,7 @@ import csv
 import random
 from pathlib import Path
 from sklearn.model_selection import train_test_split
-from generator import generate_batch, generate_add_sub, generate_mod_div
+from data.generator import generate_batch, generate_add_sub, generate_mod_div
 
 def load_strings_from_csv(filepath):
     with open(filepath, 'r') as f:
@@ -37,15 +37,21 @@ def concat_csv_strings(filepath):
             full_string += ' '.join(row) + ' '
     return full_string.strip()
 
-raw_data_grok = generate_mod_div(d=5000, p=97, filepath='grok_97.csv')
-raw_data_97 = generate_add_sub(d=5000, p=97, filepath='add_sub_97.csv')
-raw_data_113 = generate_add_sub(d=5000, p=113, filepath='add_sub_113.csv')
+script_dir = Path(__file__).resolve().parent
 
+grok_path = script_dir / "grok_97.csv"
+add_sub_97_path = script_dir / "add_sub_97.csv"
+add_sub_113_path = script_dir / "add_sub_113.csv"
 
-raw_data_97 = load_strings_from_csv("HW2/data/add_sub_97.csv")
-raw_data_113 = load_strings_from_csv("HW2/data/add_sub_113.csv")
-raw_data_grok = load_strings_from_csv("HW2/data/grok_97csv")
+raw_data_grok = generate_mod_div(d=5000, p=97, filepath=grok_path)
+raw_data_97 = generate_add_sub(d=5000, p=97, filepath=add_sub_97_path)
+raw_data_113 = generate_add_sub(d=5000, p=113, filepath=add_sub_113_path)
 
+raw_data_97 = load_strings_from_csv(add_sub_97_path)
+raw_data_113 = load_strings_from_csv(add_sub_113_path)
+raw_data_grok = load_strings_from_csv(grok_path)
+
+splits_dir = script_dir / "splits"
 
 # ======== Configurables ========
 split_and_save(
@@ -53,7 +59,7 @@ split_and_save(
     train_ratio=0.75,
     val_ratio=0.15,
     test_ratio=0.10,
-    out_dir="splits_97",
+    out_dir=splits_dir,
     prefix="math_97"
 )
 
@@ -62,7 +68,7 @@ split_and_save(
     train_ratio=0.75,
     val_ratio=0.15,
     test_ratio=0.10,
-    out_dir="splits_113",
+    out_dir=splits_dir,
     prefix="math_113"
 )
 
@@ -71,6 +77,6 @@ split_and_save(
     train_ratio=0.75,
     val_ratio=0.15,
     test_ratio=0.10,
-    out_dir="splits_grok",
+    out_dir=splits_dir,
     prefix="mod_div"
 )
