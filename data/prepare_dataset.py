@@ -42,9 +42,9 @@ raw_data_97 = generate_add_sub(d=5000, p=97, filepath='add_sub_97.csv')
 raw_data_113 = generate_add_sub(d=5000, p=113, filepath='add_sub_113.csv')
 
 
-raw_data_97 = load_strings_from_csv("HW2/data/add_sub_97.csv")
-raw_data_113 = load_strings_from_csv("HW2/data/add_sub_113.csv")
-raw_data_grok = load_strings_from_csv("HW2/data/grok_97csv")
+raw_data_97 = load_strings_from_csv("add_sub_97.csv")
+raw_data_113 = load_strings_from_csv("add_sub_113.csv")
+raw_data_grok = load_strings_from_csv("grok_97.csv")
 
 
 # ======== Configurables ========
