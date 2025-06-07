@@ -21,8 +21,9 @@ config = GPTConfig(
 )
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print(device)
 
-EPOCHS = 10e5
+EPOCHS = 100000 # 10e5
 
 script_dir = Path(__file__).resolve().parent
 
