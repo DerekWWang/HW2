@@ -7,6 +7,7 @@ from model import GPT, GPTConfig
 from tokenizer import tokenize
 import numpy as np
 from data.prepare_dataset import concat_csv_strings
+from pathlib import Path
 
 # ==== Configuration ====
 config = GPTConfig(
@@ -22,9 +23,12 @@ config = GPTConfig(
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 EPOCHS = 10e5
-DATASET_TRAIN = "/Users/derekzhu/Code/HW2/data/splits/math_97_train.csv"
-DATASET_VALID = "/Users/derekzhu/Code/HW2/data/splits/math_97_val.csv"
-DATASET_TEST = "/Users/derekzhu/Code/HW2/data/splits/math_97_test.csv"
+
+script_dir = Path(__file__).resolve().parent
+
+DATASET_TRAIN = script_dir / "data/splits/math_97_train.csv"
+DATASET_VALID = script_dir / "data/splits/math_97_val.csv"
+DATASET_TEST = script_dir / "data/splits/math_97_test.csv"
 
 MODEL_NAME = "part_2.2"
 
