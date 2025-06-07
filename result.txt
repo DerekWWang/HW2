@@ -1,0 +1,14 @@
+['<s>', 'I', ' ', 'l', 'o', 'v', 'e', ' ', 'm', 'a', 'c', 'h', 'i', 'n', 'e', ' ', 'l', 'e', 'a', 'r', 'n', 'i', 'n', 'g', '<e>']
+Saved 3750 train, 750 val, and 500 test samples to `/home/rich/Development/Classes/HW2/data/splits/`
+Saved 3750 train, 750 val, and 500 test samples to `/home/rich/Development/Classes/HW2/data/splits/`
+Saved 3750 train, 750 val, and 500 test samples to `/home/rich/Development/Classes/HW2/data/splits/`
+cuda
+[' ', '+', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '<e>', '<s>', '=']
+{' ': 0, '+': 1, '-': 2, '0': 3, '1': 4, '2': 5, '3': 6, '4': 7, '5': 8, '6': 9, '7': 10, '8': 11, '9': 12, '<e>': 13, '<s>': 14, '=': 15}
+{0: ' ', 1: '+', 2: '-', 3: '0', 4: '1', 5: '2', 6: '3', 7: '4', 8: '5', 9: '6', 10: '7', 11: '8', 12: '9', 13: '<e>', 14: '<s>', 15: '='}
+Input shape: torch.Size([53346, 32])
+Target shape: torch.Size([53346, 32])
+number of parameters: 0.01M
+num decayed parameter tensors: 6, with 13,824 parameters
+num non-decayed parameter tensors: 10, with 480 parameters
+using fused AdamW: True

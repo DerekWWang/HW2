@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -96,7 +97,31 @@ optimizer = model.configure_optimizers(
     device_type=device
 )
 
-for step in trange(EPOCHS, desc="Training"):
+checkpoint_path = "model_checkpoint.pth"
+
+def save_checkpoint(model, optimizer, step, loss, filename=checkpoint_path):
+    checkpoint = {
+        'step': step,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'loss': loss
+    }
+    torch.save(checkpoint, filename)
+    print(f"Checkpoint saved at step {step}")
+
+def load_checkpoint(model, optimizer, filename=checkpoint_path):
+    if os.path.exists(filename):
+        checkpoint = torch.load(filename)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        print(f"Checkpoint loaded from step {checkpoint['step']}")
+        return checkpoint['step'] + 1  
+    else:
+        return 0 
+
+start_step = load_checkpoint(model, optimizer)
+
+for step in range(start_step, EPOCHS):
     logits = model(x)
     B, T, C = logits.shape
 
@@ -109,7 +134,8 @@ for step in trange(EPOCHS, desc="Training"):
     optimizer.step()
 
     if step % 50 == 0 or step == EPOCHS - 1:
-        tqdm.write(f"Step {step}: Loss = {loss.item():.9f}")
+        print(f"Step {step}: Loss = {loss.item():.9f}")
+        save_checkpoint(model, optimizer, step, loss.item())
 
 # ==== Evaluation on Validation Set ====
 print("\nRunning evaluation on validation set...")
