@@ -2,7 +2,7 @@ import csv
 import random
 from pathlib import Path
 from sklearn.model_selection import train_test_split
-from data.generator import generate_batch, generate_add_sub, generate_mod_div
+from generator import generate_batch, generate_add_sub, generate_mod_div
 
 def load_strings_from_csv(filepath):
     with open(filepath, 'r') as f:

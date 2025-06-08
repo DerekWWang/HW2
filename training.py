@@ -7,21 +7,22 @@ import time
 from model import GPT, GPTConfig
 from tokenizer import tokenize
 import numpy as np
-from data.prepare_dataset import concat_csv_strings
+# from data.prepare_dataset import concat_csv_strings
 from pathlib import Path
 from tqdm import tqdm, trange
+import csv
+
+
+
+def concat_csv_strings(filepath):
+    full_string = ""
+    with open(filepath, newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            full_string += ' '.join(row) + ' '
+    return full_string.strip()
 
 # ==== Configuration ====
-config = GPTConfig(
-    block_size=32,
-    vocab_size=19,    
-    n_layer=1,
-    n_head=4,
-    n_embd=64,
-    dropout=0.0,
-    bias=True
-)
-
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(device)
 
@@ -29,11 +30,11 @@ EPOCHS = 100000 # 10e5
 
 script_dir = Path(__file__).resolve().parent
 
-DATASET_TRAIN = script_dir / "data/splits/math_97_train.csv"
-DATASET_VALID = script_dir / "data/splits/math_97_val.csv"
-DATASET_TEST = script_dir / "data/splits/math_97_test.csv"
+DATASET_TRAIN = script_dir / "data/splits/mod_div_train.csv"
+DATASET_VALID = script_dir / "data/splits/mod_div_val.csv"
+DATASET_TEST = script_dir / "data/splits/mod_div_test.csv"
 
-MODEL_NAME = "part_2.2"
+MODEL_NAME = "part_2.4"
 
 # ==== Reproducibility ====
 def seed_everything(seed=42):
@@ -58,7 +59,7 @@ decode = lambda l: ''.join([itos[i] for i in l])
 config = GPTConfig(
     block_size=32,  
     vocab_size=len(vocab),
-    n_layer=1,
+    n_layer=7,
     n_head=4,
     n_embd=32,
     dropout=0.0,
