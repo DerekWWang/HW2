@@ -36,7 +36,7 @@ DATASET_TEST = script_dir / "data/splits/math_97_test.csv"
 MODEL_NAME = "part_2.2"
 
 # ==== Reproducibility ====
-def seed_everything(seed=42):
+def seed_everything(seed=69):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
