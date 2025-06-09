@@ -36,7 +36,7 @@ DATASET_TEST = script_dir / "data/splits/math_97_test.csv"
 MODEL_NAME = "part_2.2"
 
 # ==== Reproducibility ====
-def seed_everything(seed=42):
+def seed_everything(seed=69):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -121,6 +121,11 @@ def load_checkpoint(model, optimizer, filename=checkpoint_path):
 
 start_step = load_checkpoint(model, optimizer)
 
+loss_log_path = "loss_log.txt"
+if start_step == 0:
+    with open(loss_log_path, "w") as f:
+        f.write("step,loss\n")
+
 for step in range(start_step, EPOCHS):
     logits = model(x)
     B, T, C = logits.shape
@@ -136,6 +141,9 @@ for step in range(start_step, EPOCHS):
     if step % 50 == 0 or step == EPOCHS - 1:
         print(f"Step {step}: Loss = {loss.item():.9f}")
         save_checkpoint(model, optimizer, step, loss.item())
+        
+        with open(loss_log_path, "a") as f:
+            f.write(f"{step},{loss.item():.9f}\n")
 
 # ==== Evaluation on Validation Set ====
 print("\nRunning evaluation on validation set...")
