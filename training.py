@@ -139,7 +139,7 @@ for step in range(start_step, EPOCHS):
     optimizer.step()
 
     if step % 50 == 0 or step == EPOCHS - 1:
-        print(f"Step {step}: Loss = {loss.item():.9f},")
+        print(f"Step {step}: Train Loss = {loss.item():.9f}, ", end='')
         
         with open(loss_log_path, "a") as f:
             f.write(f"{step},{loss.item():.9f},")
@@ -170,7 +170,7 @@ for step in range(start_step, EPOCHS):
             val_targets = y_val.view(B * T)
             val_loss = F.cross_entropy(val_logits, val_targets)
 
-        print(f"{val_loss.item():.9f}\n")
+        print(f"Val Loss = {val_loss.item():.9f}\n")
         with open(loss_log_path, "a") as f:
             f.write(f"{val_loss.item():.9f}\n")
         model.train()
