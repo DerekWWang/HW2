@@ -1,0 +1,1 @@
+Trained with 1200 train examples, 300 val samples, and 300 test samples
