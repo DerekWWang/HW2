@@ -37,7 +37,7 @@ DATASET_TEST = script_dir / "data/splits/mod_div_test.csv"
 MODEL_NAME = "part_2.4"
 
 # ==== Reproducibility ====
-def seed_everything(seed=42):
+def seed_everything(seed=69):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -125,7 +125,7 @@ start_step = load_checkpoint(model, optimizer)
 loss_log_path = "loss_log.txt"
 if start_step == 0:
     with open(loss_log_path, "w") as f:
-        f.write("step,loss\n")
+        f.write("step,train_loss,val_loss\n")
 
 for step in range(start_step, EPOCHS):
     logits = model(x)
@@ -140,42 +140,43 @@ for step in range(start_step, EPOCHS):
     optimizer.step()
 
     if step % 50 == 0 or step == EPOCHS - 1:
-        print(f"Step {step}: Loss = {loss.item():.9f}")
-        save_checkpoint(model, optimizer, step, loss.item())
+        print(f"Step {step}: Train Loss = {loss.item():.9f}, ", end='')
         
         with open(loss_log_path, "a") as f:
-            f.write(f"{step},{loss.item():.9f}\n")
+            f.write(f"{step},{loss.item():.9f},")
 
-# ==== Evaluation on Validation Set ====
-print("\nRunning evaluation on validation set...")
+        # ==== Evaluation on Validation Set ====
+        val_data = concat_csv_strings(DATASET_VALID)
+        val_tokens = tokenize(val_data)
 
-val_data = concat_csv_strings(DATASET_VALID)
-val_tokens = tokenize(val_data)
+        if len(val_tokens) < config.block_size + 1:
+            pad_len = config.block_size + 1 - len(val_tokens)
+            val_tokens += ['<e>'] * pad_len
 
-if len(val_tokens) < config.block_size + 1:
-    pad_len = config.block_size + 1 - len(val_tokens)
-    val_tokens += ['<e>'] * pad_len
+        X_val, Y_val = [], []
+        for i in range(len(val_tokens) - config.block_size):
+            chunk_input = val_tokens[i:i + config.block_size]
+            chunk_target = val_tokens[i + 1:i + config.block_size + 1]
+            X_val.append(encode(chunk_input))
+            Y_val.append(encode(chunk_target))
 
-X_val, Y_val = [], []
-for i in tqdm(range(len(val_tokens) - config.block_size), desc="Encoding validation chunks"):
-    chunk_input = val_tokens[i:i + config.block_size]
-    chunk_target = val_tokens[i + 1:i + config.block_size + 1]
-    X_val.append(encode(chunk_input))
-    Y_val.append(encode(chunk_target))
+        x_val = torch.tensor(X_val, dtype=torch.long).to(device)
+        y_val = torch.tensor(Y_val, dtype=torch.long).to(device)
 
-x_val = torch.tensor(X_val, dtype=torch.long).to(device)
-y_val = torch.tensor(Y_val, dtype=torch.long).to(device)
+        model.eval()
+        with torch.no_grad():
+            val_logits = model(x_val)
+            B, T, C = val_logits.shape
+            val_logits = val_logits.view(B * T, C)
+            val_targets = y_val.view(B * T)
+            val_loss = F.cross_entropy(val_logits, val_targets)
 
-model.eval()
-with torch.no_grad():
-    val_logits = model(x_val)
-    B, T, C = val_logits.shape
-    val_logits = val_logits.view(B * T, C)
-    val_targets = y_val.view(B * T)
-    val_loss = F.cross_entropy(val_logits, val_targets)
+        print(f"Val Loss = {val_loss.item():.9f}\n")
+        with open(loss_log_path, "a") as f:
+            f.write(f"{val_loss.item():.9f}\n")
+        model.train()
 
-print(f"Validation Loss = {val_loss.item():.9f}")
-model.train()
+        save_checkpoint(model, optimizer, step, loss.item())
 
 # ==== Save Model ====
 save_path = f"{MODEL_NAME}_model.pt"
