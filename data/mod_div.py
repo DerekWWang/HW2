@@ -47,7 +47,7 @@ if __name__ == "__main__":
     random.seed(42)            # for reproducible shuffling
     moduli = [97]
     for p in moduli:
-        data = generate_mod_examples(p)[:3000]
+        data = generate_mod_examples(p)[:5000]
         train, val, test = split_dataset(data, train_frac=0.8, val_frac=0.1)
 
         # write out files

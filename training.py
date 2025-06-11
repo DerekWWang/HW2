@@ -30,11 +30,10 @@ EPOCHS = 100000 # 10e5
 
 script_dir = Path(__file__).resolve().parent
 
-DATASET_TRAIN = script_dir / "data/splits/mod_div_train.csv"
-DATASET_VALID = script_dir / "data/splits/mod_div_val.csv"
-DATASET_TEST = script_dir / "data/splits/mod_div_test.csv"
+DATASET_TRAIN = "/home/group7/code/CSE599K_SP25_Code/assignment5/HW2/data/test_mod97.csv"
+DATASET_VALID = "/home/group7/code/CSE599K_SP25_Code/assignment5/HW2/data/val_mod97.csv"
 
-MODEL_NAME = "part_2.4"
+MODEL_NAME = "part_2.3"
 
 # ==== Reproducibility ====
 def seed_everything(seed=42):
@@ -59,9 +58,9 @@ decode = lambda l: ''.join([itos[i] for i in l])
 config = GPTConfig(
     block_size=32,  
     vocab_size=len(vocab),
-    n_layer=7,
+    n_layer=2,
     n_head=4,
-    n_embd=32,
+    n_embd=128,
     dropout=0.0,
     bias=True
 )
